@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Авторизация CafeOS -->
+<section id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <h1>☕ CafeOS</h1>
+    <p>Система управления кафе</p>
+
+    <div class="auth-tabs">
+      <button type="button" id="showLogin" class="primary">
+        Вход
+      </button>
+      <button type="button" id="showRegister">
+        Регистрация
+      </button>
+    </div>
+
+    <form id="loginForm">
+      <h2>Вход в аккаунт</h2>
+
+      <label for="loginName">Имя пользователя</label>
+      <input id="loginName" required maxlength="40"
+             autocomplete="username" placeholder="Введите имя">
+
+      <label for="loginPassword">Пароль</label>
+      <input id="loginPassword" type="password" required
+             autocomplete="current-password" placeholder="Введите пароль">
+
+      <button class="primary auth-submit" type="submit">
+        Войти
+      </button>
+    </form>
+
+    <form id="registerForm" class="hidden">
+      <h2>Создать аккаунт</h2>
+
+      <label for="registerName">Имя пользователя</label>
+      <input id="registerName" required minlength="2" maxlength="40"
+             autocomplete="username" placeholder="Придумайте имя">
+
+      <label for="registerPassword">Пароль</label>
+      <input id="registerPassword" type="password" required
+             minlength="4" autocomplete="new-password"
+             placeholder="Придумайте пароль">
+
+      <label for="confirmPassword">Повторите пароль</label>
+      <input id="confirmPassword" type="password" required
+             minlength="4" autocomplete="new-password"
+             placeholder="Повторите пароль">
+
+      <button class="primary auth-submit" type="submit">
+        Зарегистрироваться
+      </button>
+    </form>
+
+    <p id="authMessage" role="status"></p>
+  </div>
+</section>
+
+<div id="appShell" class="hidden">
+    <aside class="sidebar">
+    <h2>☕ CafeOS</h2>
+    <p class="subtitle">СИСТЕМА УПРАВЛЕНИЯ</p>
+
+    <button onclick="showPage('dashboard')">🏠 Главная</button>
+    <button onclick="showPage('menu')">🍔 Меню</button>
+    <button onclick="showPage('orders')">📋 Заказы</button>
+    <button onclick="showPage('cashier')">💰 Касса</button>
+    <button onclick="showPage('favorites')">❤️ Избранное</button>
+    <button onclick="showPage('admin')">🛠️ Админ-панель</button>
+    <button onclick="showPage('settings')">⚙️ Настройки</button>
+  </aside>
+
+  <main class="main">
+    <header>
+      <div>
+        <h1 id="pageTitle">Главная</h1>
+        <p>Добро пожаловать в CafeOS 👋</p>
+      </div>
+      <div class="profile">A</div>
+    </header>
+
+    <!-- Главная -->
+    <section id="dashboard" class="page">
+      <div class="stats">
+        <div class="card">
+          <p>💰 Выручка</p>
+          <h2 id="revenue">0 сом</h2>
+        </div>
+        <div class="card">
+          <p>📋 Заказы</p>
+          <h2 id="orderCount">0</h2>
+        </div>
+        <div class="card">
+          <p>🍔 Блюда в меню</p>
+          <h2 id="foodCount">0</h2>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Последние заказы</h2>
+        <div id="recentOrders">Заказов пока нет</div>
+      </div>
+    </section>
+
+    <!-- Меню -->
+    <section id="menu" class="page hidden">
+      <h2>Наше меню 🍽️</h2>
+
+      <div id="menuList" class="food-grid"></div>
+
+      <div class="panel">
+        <h3>Добавить блюдо</h3>
+        <input id="foodName" placeholder="Название блюда" maxlength="80">
+        <input id="foodPrice" type="number" min="1" placeholder="Цена в сомах">
+        <button class="primary" onclick="addFood()">＋ Добавить блюдо</button>
+      </div>
+    </section>
+
+    <!-- Заказы -->
+    <section id="orders" class="page hidden">
+      <h2>Все заказы 📋</h2>
+      <div id="ordersList" class="panel">Заказов пока нет</div>
+    </section>
+
+    <!-- Касса -->
+    <section id="cashier" class="page hidden">
+      <h2>Касса 💰</h2>
+
+      <div class="panel">
+        <p>Выбранные блюда:</p>
+        <div id="cart">Корзина пуста</div>
+        <hr>
+        <h3>Итого: <span id="total">0</span> сом</h3>
+
+        <button class="primary" onclick="createOrder()">
+          Оформить заказ
+        </button>
+        <button onclick="clearCart()">Очистить корзину</button>
+      </div>
+    </section>
+
+    <!-- Избранное -->
+    <section id="favorites" class="page hidden">
+      <h2>Избранные блюда ❤️</h2>
+      <div id="favoritesList" class="food-grid"></div>
+    </section>
+
+    <!-- Админ-панель -->
+    <section id="admin" class="page hidden">
+      <h2>Панель управления 🛠️</h2>
+
+      <div class="stats">
+        <div class="card">
+          <p>Всего товаров</p>
+          <h2 id="adminFoodCount">0</h2>
+        </div>
+        <div class="card">
+          <p>Всего заказов</p>
+          <h2 id="adminOrderCount">0</h2>
+        </div>
+        <div class="card">
+          <p>Выручка</p>
+          <h2 id="adminRevenue">0 сом</h2>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Управление товарами</h3>
+        <p>Добавляй блюда через раздел «Меню», удаляй ненужные товары там же.</p>
+      </div>
+
+      <div class="panel">
+        <h3>Экспорт заказов</h3>
+        <button class="primary" onclick="exportOrders()">📥 Скачать отчёт CSV</button>
+      </div>
+    </section>
+
+    <!-- Настройки -->
+    <section id="settings" class="page hidden">
+      <h2>Настройки ⚙️</h2>
+
+      <div class="panel">
+        <label for="cafeName">Название кафе</label>
+        <input id="cafeName" value="CafeOS" maxlength="80">
+        <button class="primary" onclick="saveSettings()">Сохранить</button>
+      </div>
+
+      <div class="panel">
+        <h3>Язык и оформление</h3>
+        <label for="languageSelect">Язык</label>
+        <select id="languageSelect">
+          <option value="ru">Русский</option>
+          <option value="ky">Кыргызча</option>
+          <option value="en">English</option>
+        </select>
+
+        
+        <button id="themeButton" onclick="toggleTheme()">🌙ночная тема</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
+
+
