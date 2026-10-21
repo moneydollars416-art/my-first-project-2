@@ -72,6 +72,8 @@
     <button onclick="showPage('dashboard')">🏠 Главная</button>
     <button onclick="showPage('menu')">🍔 Меню</button>
     <button onclick="showPage('orders')">📋 Заказы</button>
+    <button onclick="showPage('reservations')">
+    🪑 Бронирование</button>
     <button onclick="showPage('cashier')">💰 Касса</button>
     <button onclick="showPage('favorites')">❤️ Избранное</button>
     <button onclick="showPage('admin')">🛠️ Админ-панель</button>
@@ -129,6 +131,71 @@
       <h2>Все заказы 📋</h2>
       <div id="ordersList" class="panel">Заказов пока нет</div>
     </section>
+
+    <!-- Страница бронирования столиков -->
+<section id="reservations" class="page hidden">
+    <h2>🪑 Бронирование столиков</h2>
+    <p>Забронируй столик для гостей кафе</p>
+
+    <div class="reservation-form">
+        <form id="reservationForm" onsubmit="createReservation(event)">
+            <label for="reservationName">Имя гостя</label>
+            <input
+                type="text"
+                id="reservationName"
+                placeholder="Например, Али"
+                required
+            >
+
+            <label for="reservationPhone">Номер телефона</label>
+            <input
+                type="tel"
+                id="reservationPhone"
+                placeholder="+996..."
+                required
+            >
+
+            <label for="reservationDate">Дата</label>
+            <input type="date" id="reservationDate" required>
+
+            <label for="reservationTime">Время</label>
+            <input
+                type="time"
+                id="reservationTime"
+                min="09:00"
+                max="22:00"
+                required
+            >
+
+            <label for="reservationGuests">Количество гостей</label>
+            <select id="reservationGuests" required>
+                <option value="1">1 гость</option>
+                <option value="2" selected>2 гостя</option>
+                <option value="3">3 гостя</option>
+                <option value="4">4 гостя</option>
+                <option value="5">5 гостей</option>
+                <option value="6">6 гостей</option>
+            </select>
+
+            <label for="reservationTable">Столик</label>
+            <select id="reservationTable" required>
+                <option value="1">Столик №1</option>
+                <option value="2">Столик №2</option>
+                <option value="3">Столик №3</option>
+                <option value="4">Столик №4</option>
+                <option value="5">Столик №5</option>
+                <option value="6">Столик №6</option>
+            </select>
+
+            <button type="submit" class="primary">
+                ✅ Забронировать столик
+            </button>
+        </form>
+    </div>
+
+    <h3>📋 Список бронирований</h3>
+    <div id="reservationsList"></div>
+</section>
 
     <!-- Касса -->
     <section id="cashier" class="page hidden">

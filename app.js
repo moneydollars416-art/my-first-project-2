@@ -97,23 +97,40 @@ function showPage(page) {
   });
 
   const selectedPage = document.getElementById(page);
-  if (selectedPage) selectedPage.classList.remove("hidden");
+  if (selectedPage) {
+    selectedPage.classList.remove("hidden");
+  }
 
   const titles = {
     dashboard: t("dashboard"),
     menu: t("menu"),
     orders: t("orders"),
     cashier: t("cashier"),
-    settings: t("settings")
+    favorites: "Избранное",
+    admin: "Админ-панель",
+    settings: t("settings"),
+    reservations: "🪑 Бронирование столиков"
   };
 
   const title = document.getElementById("pageTitle");
-  if (title) title.textContent = titles[page] || page;
+  if (title) {
+    title.textContent = titles[page] || page;
+  }
 
   renderMenu();
   renderCart();
   renderOrders();
   updateDashboard();
+
+  if (typeof renderFavorites === "function") {
+    renderFavorites();
+  }
+
+  if (page === "reservations") {
+    if (typeof renderReservations === "function") {
+      renderReservations();
+    }
+  }
 }
 
 function setupMenuControls() {
@@ -244,16 +261,8 @@ function deleteFood(id) {
   updateDashboard();
 }
 
-function toggleFavorite(id) {
-  if (favorites.includes(id)) {
-    favorites = favorites.filter(favoriteId => favoriteId !== id);
-  } else {
-    favorites.push(id);
-  }
 
-  saveData();
-  renderMenu();
-}
+
 
 function leaveReview(id) {
   const item = menu.find(food => food.id === id);
@@ -275,6 +284,49 @@ function leaveReview(id) {
 
   saveData();
   renderMenu();
+}
+
+function toggleFavorite(id) {
+  id = Number(id);
+
+  if (favorites.includes(id)) {
+    favorites = favorites.filter(favoriteId => favoriteId !== id);
+  } else {
+    favorites.push(id);
+  }
+
+  saveData();
+  renderMenu();
+  renderFavorites();
+}
+
+function renderFavorites() {
+  const favoritesList = document.getElementById("favoritesList");
+  if (!favoritesList) return;
+
+  const favoriteFoods = menu.filter(item =>
+    favorites.includes(Number(item.id))
+  );
+
+  favoritesList.innerHTML = favoriteFoods.map(item => `
+    <div class="product">
+      <img class="food-image"
+           src="${getFoodImage(item.name)}"
+           alt="${escapeHTML(item.name)}">
+
+      <h3>${escapeHTML(item.name)}</h3>
+      <p>${item.price} сом</p>
+
+      <button class="primary"
+              onclick="addToCart(${item.id})">
+        🛒 Добавить в корзину
+      </button>
+
+      <button onclick="toggleFavorite(${item.id})">
+        💔 Убрать из избранного
+      </button>
+    </div>
+  `).join("") || "<p>В избранном пока нет блюд ❤️</p>";
 }
 
 function addToCart(id) {
@@ -485,11 +537,6 @@ function setupExtraSettings() {
   document.getElementById("themeButton").addEventListener("click", toggleTheme);
 }
 
-function toggleTheme() {
-  const dark = document.body.classList.toggle("dark-theme");
-  localStorage.setItem("darkTheme", dark ? "true" : "false");
-}
-
 function loadTheme() {
   if (localStorage.getItem("darkTheme") === "true") {
     document.body.classList.add("dark-theme");
@@ -550,11 +597,9 @@ function changeLanguage() {
 }
 
 function toggleTheme() {
-  document.body.classList.toggle("dark-theme");
+  const isDark = document.body.classList.toggle("dark-theme");
 
-  const isDark = document.body.classList.contains("dark-theme");
-
-  localStorage.setItem("darkTheme", isDark);
+  localStorage.setItem("darkTheme", isDark ? "true" : "false");
 
   const button = document.getElementById("themeButton");
 
@@ -805,3 +850,143 @@ function getFoodImage(name) {
   return images[name] ||
     "https://placehold.co/600x400?text=Food";
 }
+
+// ===== CAFEOS: БРОНИРОВАНИЕ СТОЛИКОВ =====
+
+let reservations = loadJSON("cafeReservations", []);
+
+function createReservation(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("reservationName").value.trim();
+    const phone = document.getElementById("reservationPhone").value.trim();
+    const date = document.getElementById("reservationDate").value;
+    const time = document.getElementById("reservationTime").value;
+    const guests = Number(document.getElementById("reservationGuests").value);
+    const table = document.getElementById("reservationTable").value;
+
+    if (!name || !phone || !date || !time) {
+        alert("Заполни все поля!");
+        return;
+    }
+
+    const selectedDateTime = new Date(`${date}T${time}`);
+    if (Number.isNaN(selectedDateTime.getTime()) ||
+        selectedDateTime <= new Date()) {
+        alert("Выбери будущую дату и время!");
+        return;
+    }
+
+    // Не разрешаем два бронирования одного столика
+    // на одну и ту же дату и время.
+    const occupied = reservations.some(item =>
+        item.table === table &&
+        item.date === date &&
+        item.time === time &&
+        item.status !== "Отменено"
+    );
+
+    if (occupied) {
+        alert("Этот столик уже забронирован на выбранное время!");
+        return;
+    }
+
+    const reservation = {
+        id: Date.now(),
+        name,
+        phone,
+        date,
+        time,
+        guests,
+        table,
+        status: "Подтверждено"
+    };
+
+    reservations.push(reservation);
+    saveReservations();
+
+    document.getElementById("reservationForm").reset();
+    document.getElementById("reservationDate").value =
+        document.getElementById("reservationDate").min;
+
+    renderReservations();
+
+    alert("Столик успешно забронирован! 🎉");
+}
+
+function saveReservations() {
+    localStorage.setItem(
+        "cafeReservations",
+        JSON.stringify(reservations)
+    );
+}
+
+function renderReservations() {
+    const list = document.getElementById("reservationsList");
+    if (!list) return;
+
+    if (reservations.length === 0) {
+        list.innerHTML = "<p>Пока бронирований нет 🪑</p>";
+        return;
+    }
+
+    const sortedReservations = [...reservations].sort((a, b) =>
+        `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`)
+    );
+
+    list.innerHTML = sortedReservations.map(item => `
+        <div class="reservation-card">
+            <h4>🪑 Столик №${escapeHTML(String(item.table))}</h4>
+
+            <p><strong>Гость:</strong> ${escapeHTML(item.name)}</p>
+            <p><strong>Телефон:</strong> ${escapeHTML(item.phone)}</p>
+            <p><strong>Дата:</strong> ${escapeHTML(item.date)}</p>
+            <p><strong>Время:</strong> ${escapeHTML(item.time)}</p>
+            <p><strong>Гостей:</strong> ${escapeHTML(String(item.guests))}</p>
+
+            <span class="reservation-status">
+                ${escapeHTML(item.status)}
+            </span>
+
+            ${item.status !== "Отменено" ? `
+                <br>
+                <button
+                    class="cancel-reservation"
+                    onclick="cancelReservation(${Number(item.id)})">
+                    Отменить бронь
+                </button>
+            ` : ""}
+        </div>
+    `).join("");
+}
+
+function cancelReservation(id) {
+    const reservation = reservations.find(item => item.id === id);
+    if (!reservation || reservation.status === "Отменено") return;
+
+    if (!confirm("Точно отменить это бронирование?")) return;
+
+    reservation.status = "Отменено";
+    saveReservations();
+    renderReservations();
+}
+
+// Устанавливаем минимальную дату — сегодня.
+function setupReservationDate() {
+    const dateInput = document.getElementById("reservationDate");
+    if (!dateInput) return;
+
+    const now = new Date();
+    const localDate = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")
+    ].join("-");
+
+    dateInput.min = localDate;
+    dateInput.value = localDate;
+}
+
+// Показываем сохранённые бронирования после загрузки.
+setupReservationDate();
+renderReservations();

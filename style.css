@@ -580,3 +580,95 @@ body.dark-theme .product {
   background: #1e1e1e;
   color: white;
 }
+/* ===== БРОНИРОВАНИЕ СТОЛИКОВ ===== */
+
+.reservation-form {
+    max-width: 600px;
+    margin: 20px 0;
+    padding: 22px;
+    background: var(--card-bg, #ffffff);
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+#reservationForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#reservationForm label {
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+#reservationForm input,
+#reservationForm select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5ce;
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+#reservationForm button {
+    margin-top: 12px;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: #198754;
+    color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.reservation-card {
+    margin: 12px 0;
+    padding: 16px;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid #dce5de;
+    border-radius: 12px;
+}
+
+.reservation-card h4 {
+    margin: 0 0 10px;
+}
+
+.reservation-card p {
+    margin: 6px 0;
+}
+
+.reservation-status {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #d8f3e3;
+    color: #17683d;
+    font-size: 13px;
+}
+
+.cancel-reservation {
+    margin-top: 12px;
+    padding: 9px 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+body.dark-theme .reservation-form,
+body.dark-theme .reservation-card {
+    background: #202a24;
+    color: #ffffff;
+    border-color: #3b4b40;
+}
+
+body.dark-theme #reservationForm input,
+body.dark-theme #reservationForm select {
+    background: #17231c;
+    color: white;
+    border-color: #526357;
+}
